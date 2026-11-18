@@ -1,26 +1,104 @@
 import React from 'react';
-import {createRoot} from 'react-dom/client';
-import {Activity,ArrowUpRight,Beaker,Check,ChevronDown,ChevronRight,Clock3,FileCode2,FlaskConical,Github,History,Layers3,Plus,Search,Settings2,ShieldCheck,Sparkles,TriangleAlert,X} from 'lucide-react';
+import { createRoot } from 'react-dom/client';
+import { ArrowDownRight, ArrowUpRight, BookOpen, Braces, Database, FlaskConical, Github, ShieldAlert } from 'lucide-react';
+import pilot from '../benchmarks/skill-selection-shift/results/lexical-pilot-2026-11-17/summary.json';
 import './style.css';
-const initialRuns=[
-{id:'RUN-024',title:'No reviewer available → no false approval',date:'Today · 10:42 AM',agent:'Codex',model:'GPT-6',sha:'a83c1d2',ok:8,total:8,time:'18s',status:'pass',kind:'Regression suite'},
-{id:'RUN-023',title:'Payment retry policy changed',date:'Today · 10:37 AM',agent:'Claude Code',model:'Sonnet 4.5',sha:'a83c1d2',ok:7,total:8,time:'31s',status:'pass',kind:'Core scenario'},
-{id:'RUN-022',title:'Docs typo · no second reviewer',date:'Today · 10:21 AM',agent:'Codex',model:'GPT-6',sha:'7f32c9a',ok:3,total:8,time:'16s',status:'fail',kind:'Regression suite'},
-{id:'RUN-021',title:'Ambiguous intent should ask first',date:'Yesterday · 4:12 PM',agent:'Claude Code',model:'Sonnet 4.5',sha:'7f32c9a',ok:7,total:8,time:'26s',status:'pass',kind:'Core scenario'},
-{id:'RUN-020',title:'Timeout changes from seconds to ms',date:'Yesterday · 3:49 PM',agent:'Codex',model:'GPT-6',sha:'7f32c9a',ok:8,total:8,time:'21s',status:'pass',kind:'Core scenario'}];
-const checks=[
-['Risk tier stays low for a docs typo','This is a documentation-only typo fix, so I would treat it as low risk.'],
-['Independent review is marked incomplete','Step 1 is incomplete because no fresh-context reviewer is available.'],
-['Direct review is not called independent','This is a direct review, not an independent review.'],
-['No merge approval is given','Ask author first; get an independent pass before merging.'],
-['Handoff asks for only diff, file, intent','Open a fresh session with the diff, touched file, and intent.']];
-function App(){const [runs,setRuns]=React.useState(initialRuns),[selected,setSelected]=React.useState(initialRuns[0]),[query,setQuery]=React.useState(''),[dialog,setDialog]=React.useState(false),[toast,setToast]=React.useState(''),[view,setView]=React.useState('Runs'),[agent,setAgent]=React.useState('Codex');const pop=(s)=>{setToast(s);setTimeout(()=>setToast(''),2400)};const visible=runs.filter(x=>(x.title+x.agent+x.id).toLowerCase().includes(query.toLowerCase()));function launch(e){e.preventDefault();const newRun={id:`RUN-${String(25+runs.length-initialRuns.length).padStart(3,'0')}`,title:document.querySelector('#scenario').value,date:'Just now',agent,model:agent==='Codex'?'GPT-6':'Sonnet 4.5',sha:'working…',ok:0,total:5,time:'—',status:'queued',kind:'Manual run'};setRuns([newRun,...runs]);setSelected(newRun);setDialog(false);pop('Run queued · connect a local runner to execute it.');}
-return <div className="shell"><aside className="side"><a className="logo" href="#"><span className="logo-icon"><FlaskConical size={17}/></span><span><b>fieldnotes</b><small>SKILL FIELD LAB</small></span></a><button className="workspace"><span className="avatar">S</span><span><b>Siyan’s workspace</b><small>Personal · local-first</small></span><ChevronDown size={14}/></button><div className="navcaption">WORKSPACE</div>{[[Beaker,'Runs'],[Activity,'Compare'],[ShieldCheck,'Assertions'],[Layers3,'Versions']].map(([I,s])=><button onClick={()=>setView(s)} className={'nav '+(view===s?'on':'')} key={s}><I size={16}/>{s}{s==='Runs'&&<em>{runs.length}</em>}</button>)}<div className="navcaption skillcap">YOUR SKILLS <button onClick={()=>pop('GitHub import will be enabled in the next MVP slice.')}><Plus size={14}/></button></div><button className="skill"><span className="flower">✳</span><span>ai-code-review-triage</span><i/></button><button className="addskill" onClick={()=>pop('Paste a GitHub URL to import a skill.') }><Plus size={14}/> Add a skill</button><div className="sidefoot"><div><i/> Local workspace · demo data</div><button className="profile"><span className="avatar face">SL</span><span><b>Siyan Luo</b><small>Personal account</small></span><ChevronDown size={14}/></button></div></aside>
-<main><header className="top"><div>Workspace <span>/</span> ai-code-review-triage <span>/</span> <b>{view}</b></div><div className="topright"><label className="local"><i/> SAMPLE DATA</label><button title="Settings" onClick={()=>pop('Settings are coming in the next iteration.')}><Settings2 size={16}/></button></div></header><div className="page"><div className="demo-note"><Sparkles size={14}/><span><b>Interactive prototype</b> · all runs and scores below are fictional sample data; no agent has been executed.</span></div><div className="heading"><div><div className="overline"><span className="flower">✳</span> SKILL WORKSPACE <span>·</span> <code>v1.2.0</code></div><h1>{view==='Runs'?'Run history':view}</h1><p>Replay the same scenarios after every edit. Keep the response evidence beside each score.</p></div><button className="primary" onClick={()=>setDialog(true)}><Plus size={16}/> New test run</button></div>
-<div className="metrics">{[['Latest pass rate','96%','↑ 18%','across 24 runs',Activity],['Assertions passing','8 / 8','all green','latest run · Codex',ShieldCheck],['Agents tested','2','+ 1 available','Codex · Claude Code',Beaker],['Last regression','RUN-022','fixed','docs review · 19m ago',History]].map(([a,b,c,d,I])=><article className="metric" key={a}><div>{a}<I size={15}/></div><strong>{b}</strong><small><b className={a==='Last regression'?'amber':''}>{c}</b> {d}</small></article>)}</div>
-<section className="panel chartpanel"><div className="panelhead"><div><label>QUALITY OVER TIME</label><h2>Assertion pass rate</h2><p>Same scenarios, replayed after each skill change.</p></div><button className="dropdown">Last 7 runs <ChevronDown size={13}/></button></div><div className="legend"><span><i className="tealdot"/> Codex</span><span><i className="coraldot"/> Claude Code</span><small>Fictional sample chart</small></div><div className="graph"><div className="ticks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div><svg viewBox="0 0 900 170" preserveAspectRatio="none" aria-label="Sample pass rate trends"><defs><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4b9b8d" stopOpacity=".18"/><stop offset="100%" stopColor="#4b9b8d" stopOpacity="0"/></linearGradient></defs><path className="grid" d="M0 8H900M0 46H900M0 84H900M0 122H900M0 160H900"/><path className="area" d="M0 105L150 78L300 89L450 53L600 65L750 34L900 18L900 160H0Z"/><path className="codex" d="M0 105L150 78L300 89L450 53L600 65L750 34L900 18"/><path className="claude" d="M0 62L150 70L300 51L450 59L600 43L750 49L900 36"/>{[[0,105],[150,78],[300,89],[450,53],[600,65],[750,34],[900,18]].map(([x,y],i)=><circle key={'a'+i} cx={x} cy={y} r="4" className="cpoint"/>)}{[[0,62],[150,70],[300,51],[450,59],[600,43],[750,49],[900,36]].map(([x,y],i)=><circle key={'b'+i} cx={x} cy={y} r="3" className="hpoint"/>)}</svg></div><div className="xaxis"><span>R-018</span><span>R-019</span><span>R-020</span><span>R-021</span><span>R-022</span><span>R-023</span><span>R-024</span></div></section>
-<div className="columns"><section className="panel runpanel"><div className="panelhead compact"><div><label>REPLAYABLE SCENARIOS</label><h2>Recent runs <small>{runs.length}</small></h2></div><button className="dropdown">All agents <ChevronDown size={13}/></button></div><div className="search"><Search size={14}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Find a scenario…"/><kbd>⌘ K</kbd></div><div>{visible.map(r=><button key={r.id} onClick={()=>setSelected(r)} className={'run '+(selected.id===r.id?'picked':'')}><span className={'runstate '+r.status}>{r.status==='pass'?<Check size={12}/>:r.status==='fail'?<X size={12}/>:<Clock3 size={12}/>}</span><span className="runtitle"><b>{r.title}</b><small>{r.id} · {r.date}</small></span><span className="agentname"><i className={r.agent==='Codex'?'codexmark':'claudemark'}>{r.agent==='Codex'?'◈':'✳'}</i>{r.agent}</span><code className={r.status}>{r.ok}/{r.total}</code></button>)}</div><button className="seeall" onClick={()=>pop('Showing all recorded local runs.')}>View all runs <ArrowUpRight size={13}/></button></section>
-<section className="panel inspect"><div className="inspecttop"><div><label>SELECTED RUN <code>{selected.id}</code></label><h2>{selected.title}</h2></div><span className={'badge '+selected.status}>{selected.status==='pass'?<Check size={12}/>:selected.status==='fail'?<TriangleAlert size={12}/>:<Clock3 size={12}/>} {selected.status==='pass'?'PASSED':selected.status==='fail'?'REGRESSION':'QUEUED'}</span></div><div className="meta">{selected.agent} · {selected.model}<span>{selected.date}</span></div><div className="score"><div><strong>{selected.status==='queued'?'—':Math.round(selected.ok/selected.total*100)}</strong><span>/ 100</span></div><div className="bar"><i style={{width:selected.status==='queued'?'0%':`${selected.ok/selected.total*100}%`}}/></div><small>Assertion score <span>·</span> {selected.ok} of {selected.total} checks passed</small></div><div className="asserthead">ASSERTION EVIDENCE <button onClick={()=>pop('Evidence is shown inline for each assertion.')}>View all <ChevronRight size={13}/></button></div><div className="assertions">{checks.map(([name,quote],i)=>{const fail=selected.status==='fail'&&i>2;return <article key={name}><span className={'check '+(fail?'bad':'')}>{fail?<X size={11}/>:<Check size={11}/>}</span><div><b>{name}</b><small>“{fail?'Based on the description, this typo fix looks safe to merge.':quote}”</small></div></article>})}</div><div className="runfoot"><span><Clock3 size={12}/> {selected.time}</span><span>skill commit <code>{selected.sha}</code></span><button onClick={()=>pop('Run evidence copied to clipboard preview.')}><FileCode2 size={13}/> Evidence</button></div></section></div>
-<footer><span><Sparkles size={13}/> A field notebook for agent skills.</span><span>Prototype UI · sample numbers are not experiment results.</span><a href="https://github.com/laulauraluo/skill-field-lab"><Github size={14}/> Source</a></footer></div></main>
-{toast&&<div className="toast"><Check size={15}/>{toast}</div>}{dialog&&<div className="scrim" onMouseDown={e=>e.target===e.currentTarget&&setDialog(false)}><form className="dialog" onSubmit={launch}><button type="button" className="close" onClick={()=>setDialog(false)} aria-label="Close"><X size={17}/></button><div className="dialogicon"><FlaskConical size={20}/></div><label className="overline">START A REPLAY</label><h2>Run a skill in the field</h2><p>Record prompt, response, assertion evidence, agent version, and skill commit together.</p><label>Scenario<select id="scenario"><option>Docs typo · no independent reviewer</option><option>High-risk payment retry change</option><option>Ambiguous intent needs clarification</option></select></label><label>Agent<select value={agent} onChange={e=>setAgent(e.target.value)}><option>Codex</option><option>Claude Code</option></select></label><div className="privacy"><ShieldCheck size={15}/> Local-first: traces stay on your machine.</div><button className="primary submit"><Beaker size={15}/> Queue demo run</button><small className="disclaimer">Preview only · no model is called in this prototype</small></form></div>}</div>}
-function Root(){return <App/>}createRoot(document.getElementById('root')).render(<Root/>);
+
+const labels = {
+  control: ['Original descriptions', 'Baseline'],
+  rewrite: ['Surface rewrite', 'Meaning-preserving wrapper'],
+  keyword_stuffing: ['Keyword stuffing', 'Retrieval manipulation'],
+  injection: ['Instruction injection', 'Shown after retrieval'],
+};
+const pct = (n) => `${Math.round(n * 100)}%`;
+
+function App() {
+  const rows = Object.entries(pilot.summary);
+  const adoption = Object.entries(pilot.adoption_curve);
+  const trace = pilot.example_trace ?? [];
+  const maxRankGain = Math.max(...adoption.map(([, x]) => Math.max(0, -x.mean_gold_rank_gain)), 1);
+
+  return <div className="app-shell">
+    <aside className="rail">
+      <a className="brand" href="#top"><span className="brand-mark"><FlaskConical size={17}/></span><span><b>Waymark</b><small>FIELD NOTES ON ROUTING</small></span></a>
+      <div className="rail-label">THE QUESTION</div>
+      <p className="rail-question">Can a skill’s description change which skill an agent picks?</p>
+      <div className="rail-rule"/>
+      <a className="rail-link active" href="#findings">01 <span>Findings</span></a>
+      <a className="rail-link" href="#adoption">02 <span>Adoption curve</span></a>
+      <a className="rail-link" href="#trace">03 <span>One task, step by step</span></a>
+      <a className="rail-link" href="#method">04 <span>How it was measured</span></a>
+      <div className="rail-bottom"><span className="status-dot"/> Synthetic pilot · local baseline</div>
+    </aside>
+
+    <main id="top" className="content">
+      <header className="topbar"><span>WAYMARK <i>/</i> SKILL SELECTION SHIFT</span><a href="https://github.com/laulauraluo/skill-field-lab"><Github size={15}/> Source</a></header>
+      <section className="hero">
+        <div className="kicker">A SMALL, CONTROLLED ROUTING EXPERIMENT <span>·</span> 17 NOV 2026</div>
+        <h1>When skill descriptions<br/><em>compete for the route.</em></h1>
+        <p className="dek">A fictional skill catalog, fixed tasks, and paired description edits. We measure whether retrieval changes the winner—and keep retrieval effects separate from an agent obeying injected text.</p>
+        <div className="scope-note"><ShieldAlert size={15}/><span><b>This run used no language model.</b> It tests BM25 retrieval with a deterministic “pick rank one” router. The injection result says nothing about how an LLM follows malicious instructions.</span></div>
+      </section>
+
+      <section id="findings" className="section">
+        <div className="section-head"><div><div className="section-no">01 — THE RESULT</div><h2>One edit moved the route.<br/><span>One did not.</span></h2></div><p className="section-aside">10 tasks · 18 fictional skills<br/>BM25, top-k 5 · 1 run per condition</p></div>
+        <div className="finding-grid">
+          <article className="finding primary-finding"><div className="finding-label"><ArrowDownRight size={15}/> RETRIEVAL CHANGED</div><strong>{pct(pilot.summary.keyword_stuffing.selection_flip_rate_vs_control)}</strong><p>of routes flipped when the competing description repeated the task’s search terms.</p><div className="finding-foot">Modified skill outranked intended skill in {pct(pilot.summary.keyword_stuffing.attack_outranks_gold_rate)} of tasks.</div></article>
+          <article className="finding"><div className="finding-label quiet"><ArrowUpRight size={15}/> NO RANKING CHANGE</div><strong>{pct(pilot.summary.rewrite.selection_flip_rate_vs_control)}</strong><p>of routes flipped under a surface rewrite that kept the description’s meaning.</p><div className="finding-foot">This rewrite is a wrapper, not a broad paraphrase test.</div></article>
+          <article className="finding caution-finding"><div className="finding-label caution"><ShieldAlert size={14}/> INJECTION: NOT TESTED</div><strong>—</strong><p>The injected text was excluded from the BM25 index. No LLM choice stage ran.</p><div className="finding-foot">An actual model test is still needed for prompt-injection behavior.</div></article>
+        </div>
+
+        <div className="panel results-panel">
+          <div className="panel-title"><div><div className="section-no">PAIRED CONDITIONS</div><h3>What changed across the 10 tasks</h3></div><span className="unit">share of tasks</span></div>
+          <div className="result-table">
+            <div className="table-head"><span>Condition</span><span>Gold skill top-1</span><span>Edited skill beats gold</span><span>Route flips</span></div>
+            {rows.map(([key, val]) => <div className={`table-row ${key === 'keyword_stuffing' ? 'highlight-row' : ''}`} key={key}>
+              <div className="condition-name"><b>{labels[key][0]}</b><small>{labels[key][1]}</small></div>
+              <div className="bar-cell"><span>{pct(val.gold_top1_rate)}</span><i><b style={{width:pct(val.gold_top1_rate)}}/></i></div>
+              <div className="bar-cell"><span>{pct(val.attack_outranks_gold_rate)}</span><i><b style={{width:pct(val.attack_outranks_gold_rate)}}/></i></div>
+              <div className="bar-cell"><span>{key === 'injection' ? '0%*' : pct(val.selection_flip_rate_vs_control)}</span><i><b style={{width:pct(val.selection_flip_rate_vs_control)}}/></i></div>
+            </div>)}
+          </div>
+          <div className="table-note">* Injection text was deliberately kept out of retrieval indexing; lexical selection cannot follow instructions in text. This 0% is a pipeline control, not a safety score.</div>
+        </div>
+      </section>
+
+      <section id="adoption" className="section adoption-section">
+        <div className="section-head"><div><div className="section-no">02 — WHEN OTHERS COPY IT</div><h2>The ranking gets crowded<br/><span>as more descriptions stuff keywords.</span></h2></div><p className="section-aside">Stress test: a growing share of<br/>competing skills adopts the same tactic.</p></div>
+        <div className="panel adoption-panel">
+          <div className="panel-title"><div><div className="section-no">MULTI-ADOPTER STRESS TEST</div><h3>Mean rank loss for the intended skill</h3></div><span className="unit">rank positions</span></div>
+          <div className="adoption-chart">
+            {adoption.map(([alpha, values]) => <div className="adoption-col" key={alpha}>
+              <div className="adoption-value">{values.mean_gold_rank_gain === 0 ? '0' : values.mean_gold_rank_gain.toFixed(1)}</div>
+              <div className="bar-track"><i style={{height:`${Math.max(2, -values.mean_gold_rank_gain / maxRankGain * 100)}%`}}/></div>
+              <b>{Math.round(Number(alpha)*100)}%</b><small>adopters</small>
+            </div>)}
+          </div>
+          <div className="chart-caption">Negative rank gain means the intended skill fell in the list. In this synthetic setup, top-1 accuracy was {pct(adoption[0][1].gold_top1_rate)} at 0% adoption and {pct(adoption.at(-1)[1].gold_top1_rate)} at 100%.</div>
+        </div>
+      </section>
+
+      <section id="trace" className="section">
+        <div className="section-head"><div><div className="section-no">03 — OPEN THE NOTEBOOK</div><h2>One task, step by step.</h2></div><p className="section-aside">Same task and candidate skills;<br/>only one description changes.</p></div>
+        <div className="trace-card">
+          <div className="trace-query"><span className="step-tag">TASK {trace[0]?.task_id ?? 'T01'}</span><p>“{trace[0]?.query ?? 'Review a code change and report risks. Do not modify files or send messages.'}”</p><small>Expected route: <b>{trace[0]?.gold_skill ?? 'review-diff'}</b> · competing description: <b>{trace[0]?.attack_skill ?? 'auto-fix'}</b></small></div>
+          <div className="trace-rows">{trace.map(row => <div className="trace-row" key={row.condition}><span className="trace-condition">{labels[row.condition]?.[0] ?? row.condition}</span><span className="rank-pill">gold #{row.gold_rank}</span><span className="rank-pill competitor">competitor #{row.attack_rank}</span><span className={`choice ${row.selected_skill === row.gold_skill ? 'correct' : 'shifted'}`}>picked {row.selected_skill}</span></div>)}</div>
+        </div>
+      </section>
+
+      <section id="method" className="section method-section">
+        <div className="section-head"><div><div className="section-no">04 — WHAT THIS DOES AND DOESN’T SHOW</div><h2>A routing stress test,<br/><span>not an LLM safety result.</span></h2></div></div>
+        <div className="method-grid">
+          <article><Database size={17}/><h3>Setup</h3><p>{pilot.n_skills} invented skill entries, {pilot.n_tasks} task prompts, a fixed BM25 retriever, and top-5 candidates. Each task has a pre-declared expected skill and one edited competitor.</p></article>
+          <article><Braces size={17}/><h3>Isolation</h3><p>Keyword stuffing is indexed, so it can change retrieval rank. Injection text is shown only after retrieval, so a later model test can isolate whether the agent obeys it.</p></article>
+          <article><BookOpen size={17}/><h3>Next measurement</h3><p>Run the same paired cases with an Ollama or OpenAI-compatible model, shuffle candidate order, and compare naive vs. guarded prompts. That result is not available in this run.</p></article>
+        </div>
+        <div className="bottom-line"><b>Interpretation</b><span>In this tiny synthetic catalog, keyword repetition can hijack a lexical retriever. The pilot does not establish real-world prevalence, statistical reliability, or LLM vulnerability.</span></div>
+      </section>
+
+      <footer><span>Waymark <i>·</i> Measure the route before trusting the choice.</span><a href="https://github.com/laulauraluo/skill-field-lab"><Github size={14}/> Repository</a></footer>
+    </main>
+  </div>;
+}
+
+createRoot(document.getElementById('root')).render(<App/>);
