@@ -1,6 +1,6 @@
 {
-  "name": "skill-field-lab",
-  "version": "0.1.0",
+  "name": "waymark-skill-bench",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "scripts": {"dev":"vite --host 0.0.0.0", "build":"vite build", "preview":"vite preview --host 0.0.0.0"},
